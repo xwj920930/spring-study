@@ -1,0 +1,18 @@
+<mapping>
+	<class name="com.xwj.Xstream.XstreamEntity">
+		<!--生成xml文件根节点名字-->
+		<map-to xml="xstreamEntity"/>
+		<field name="id" type="integer">
+			<bind-xml name="id" node="element"/>
+		</field>
+		<field name="name" type="string">
+			<bind-xml name="name" node="element"/>
+		</field>
+		<field name="time" type="date">
+			<bind-xml name="time" node="element"/>
+		</field>
+		<!--<field name="list" type="list">-->
+			<!--<bind-xml name="list" node="element"/>-->
+		<!--</field>-->
+	</class>
+</mapping>

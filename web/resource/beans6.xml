@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop  
+      http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+      http://www.springframework.org/schema/tx  
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		<!--  -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>  
+	<!-- 定义dbcp数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close" p:driverClassName="${driverClassName}"
+		p:url="${url}" p:username="${username}"
+		p:password="${password}">
+	</bean>
+
+	<!-- jdbc模板，将数据源引入jdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+		p:dataSource-ref="dataSource"></bean>
+		
+	<bean id="testDao" class="com.xwj.transaction.TestDao" p:jdbcTemplate-ref="jdbcTemplate"></bean>
+	<bean id="testServiceTarget" class="com.xwj.transaction.TestService" p:testDao-ref="testDao"></bean>
+	<bean id="tService" class="com.xwj.transaction.TestService" p:testDao-ref="testDao"></bean>
+	
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+	  p:dataSource-ref="dataSource">
+	</bean>
+	  
+	<bean id="testService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+	  p:transactionManager-ref="txManager"
+	  p:target-ref="testServiceTarget">
+	  <property name="transactionAttributes">
+	    <props>
+	      <prop key="insert*">PROPAGATION_REQUIRED,+PessimisticLockingFailureException</prop>
+	    </props>
+	  </property>
+	</bean>
+	<!-- <aop:config proxy-target-class="true">
+	  <aop:pointcut expression="execution(* com.xwj.transaction.*Service.*(..))" id="serviceMethod"/>
+	  <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod"/>
+	</aop:config>
+	
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+	  <tx:attributes>
+	    <tx:method name="*" no-rollback-for="PessimisticLockingFailureException" />
+	  </tx:attributes>
+	</tx:advice> -->
+	
+	<tx:annotation-driven transaction-manager="txManager"/>
+</beans>

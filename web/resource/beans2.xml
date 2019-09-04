@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop  
+      http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+      http://www.springframework.org/schema/tx  
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		<bean id="carref" class="com.xwj.reflect.Car" scope="prototype">
+		  <property name="brand" value="suv"></property>
+		  <property name="color" value="black"></property>
+		  <property name="speed" value="100"></property>
+		</bean>
+		<!-- <bean id="bossref" class="com.xwj.reflect.Boss">
+		  <property name="car" ref="carref"></property>
+		</bean> -->
+		<bean id="bossref" class="com.xwj.reflect.Boss">
+		  <property name="car">
+		    <ref bean="carref"/>
+		  </property>
+		</bean>
+		<!-- <bean id="bossref1" class="com.xwj.reflect.Boss">
+		  <property name="car">
+		    <ref parent="carref"/>
+		  </property>
+		</bean> -->
+		<bean id="innerboss" class="com.xwj.reflect.Boss">
+		  <property name="car">
+		    <bean class="com.xwj.reflect.Car">
+		      <property name="brand" value="jmc"></property>
+		      <property name="color" value="black"></property>
+		      <property name="speed" value="100"></property>
+		    </bean>
+		  </property>
+		</bean>
+		<bean id="nullcar" class="com.xwj.reflect.Car">
+		  <property name="brand"><null></null></property>
+		  <property name="color" value="black"></property>
+		  <property name="speed" value="100"></property>
+		</bean>
+		<bean id="cascadeboss" class="com.xwj.ioc.CascadeBoss">
+		  <property name="car.brand" value="hongqi"></property>
+		</bean>
+		<bean id="arrayboss" class="com.xwj.ioc.ArrayBoss" abstract="true">
+		  <property name="list">
+		    <list>
+		      <value>a</value>
+		      <value>s</value>
+		      <value>d</value>
+		    </list>
+		  </property>
+		  <property name="set">
+		    <set>
+		      <value>1</value>
+		      <value>2</value>
+		      <value>3</value>
+		    </set>
+		  </property>
+		  <property name="map">
+		    <map>
+		      <entry>
+		        <key><value>1</value></key>
+		        <value>asd</value>
+		      </entry>
+		      <entry>
+		        <key><value>2</value></key>
+		        <value>zxc</value>
+		      </entry>
+		    </map>
+		  </property>
+		  <property name="prop">
+		    <props>
+		      <prop key="k1">k1</prop>
+		      <prop key="k2">k2</prop>
+		    </props>
+		  </property>
+		</bean>
+		<bean id="childboss" class="com.xwj.ioc.ArrayBoss" parent="arrayboss">
+		  <property name="list">
+		    <list merge="true">
+		      <value>f</value>
+		      <value>g</value>
+		    </list>
+		  </property>
+		  <property name="set">
+		    <set>
+		      <value>4</value>
+		      <value>5</value>
+		    </set>
+		  </property>
+		</bean>
+		<bean id="pcar" class="com.xwj.reflect.Car" 
+		  p:brand="suv" 
+		  p:color="black" 
+		  p:speed="100">
+		</bean>
+		<bean id="magiccar" class="com.xwj.reflect.Car" 
+		  p:brand="suv" 
+		  p:color="black" 
+		  p:speed="100" scope="prototype">
+		</bean>
+		<bean id="magicboss" class="com.xwj.ioc.MagicBoss">
+		  <lookup-method name="getCar" bean="magiccar"/>
+		</bean>
+		<bean id="boss1" class="com.xwj.ioc.Boss1">
+		  <replaced-method name="getCar" replacer="boss2"></replaced-method>
+		</bean>
+		<bean id="boss2" class="com.xwj.ioc.Boss2"></bean>
+</beans>

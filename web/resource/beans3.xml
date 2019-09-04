@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop  
+      http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+      http://www.springframework.org/schema/tx  
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		<context:component-scan base-package="com.xwj.ioc"></context:component-scan>
+		<import resource="file:D:\\BeclipseWorkSpace\\SpringTest\\WebContent\\resource\\beans2.xml"/>
+		<bean id="abstractcar" class="com.xwj.reflect.Car"
+		p:brand="jeep" p:color="blue" p:speed="100" abstract="true"
+		></bean>
+		<bean id="abscar1" p:color="yellow" class="com.xwj.reflect.Car" parent="abstractcar"></bean>
+		<bean id="abscar2" p:color="black" parent="abstractcar"></bean>
+		<bean id="carref" class="com.xwj.reflect.Car"></bean>
+		<bean id="idref" class="com.xwj.ioc.Idref">
+		  <property name="car">
+		    <idref bean="carref"/>
+		  </property>
+		</bean>
+		<bean id="pboss" class="com.xwj.reflect.Boss">
+		  <property name="car">
+		    <ref bean="pcar"/>
+		  </property>
+		</bean>
+		<bean id="carinfo" class="com.xwj.ioc.CarInfo" p:carinfo="jeep,blue,100"></bean>
+		<bean id="annboss" class="com.xwj.ioc.AnnoBoss"></bean>
+		<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		  <property name="customEditors">
+		    <map>
+		      <entry key="com.xwj.ioc2.EditCar" value="com.xwj.ioc2.CustomCarEditor"></entry>
+		    </map>
+		  </property>
+		</bean>
+		<bean id="editboss" class="com.xwj.ioc2.EditBoss">
+		  <property name="name" value="boss"></property>
+		  <property name="car" value="jeep,blue,100"></property>
+		</bean>
+		<bean id="sysconfig" class="com.xwj.ioc2.SysConfig"
+		p:sessionTimeout="10"
+		  p:maxTabPageNum="30"></bean>
+		<bean id="appmanager" class="com.xwj.ioc2.ApplicationManager"
+		  p:sessionTimeout="#{sysconfig.sessionTimeout}"
+		  p:maxTabPageNum="#{sysconfig.maxTabPageNum}"></bean>
+		<bean id="myresource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		  <property name="basenames">
+		    <list>
+		      <value>fmt_resource</value>
+		    </list>
+		  </property>
+		</bean>
+		<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		  <property name="basenames">
+		    <list>
+		      <value>fmt_resource</value>
+		    </list>
+		  </property>
+		</bean>
+		<bean class="com.xwj.ioc2.MailSendListener"></bean>
+		<bean id="mailsender" class="com.xwj.ioc2.MailSender"></bean>
+</beans>

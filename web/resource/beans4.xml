@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop  
+      http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+      http://www.springframework.org/schema/tx  
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		<bean id="greetingbefore" class="com.xwj.aop.GreetingBeforeAdvice"></bean>
+		<bean id="greetingafter" class="com.xwj.aop.GreetingAfterAdvice"></bean>
+		<bean id="greetingaround" class="com.xwj.aop.GreetingSuroundAdvice"></bean>
+		<bean id="target" class="com.xwj.aop.NaiveWaiter"></bean>
+		<bean id="targetimp" class="com.xwj.aop.NaiveWaiter"></bean>
+		<bean id="waiteradv" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:proxyInterfaces="com.xwj.aop.Waiter"
+		  p:interceptorNames="greetingaround"
+		  p:target-ref="target"
+		  p:proxyTargetClass="true"></bean>
+		<bean id="waiteradv2" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="greetingaround"
+		  p:target-ref="targetimp"
+		  p:proxyTargetClass="true"></bean>
+		<bean id="Manager" class="com.xwj.aop.TransactionManager"></bean>
+		<bean id="servicetarget" class="com.xwj.aop.ForumDao"></bean>
+		<bean id="forum" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="Manager"
+		  p:target-ref="servicetarget"
+		  p:proxyTargetClass="true"></bean>
+		<bean id="pmonitor" class="com.xwj.aop.ControllerMonitor"></bean>
+		<bean id="forumtarget" class="com.xwj.aop.ForumServiceImpl"></bean>
+		<bean id="forummonitor" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:proxyInterfaces="com.xwj.aop.Monitorable"
+		  p:interceptorNames="pmonitor"
+		  p:target-ref="forumtarget"
+		  p:proxyTargetClass="true"></bean>
+		<!-- 静态方法切面 -->
+		<bean id="waitertarget" class="com.xwj.aop.Waiter1"></bean>
+		<bean id="sellertarget" class="com.xwj.aop.Seller"></bean>
+		<bean id="greetingadvisor" class="com.xwj.aop.GreetingAdvisor"
+		  p:advice-ref="greetingbefore"></bean>
+		<bean id="parent" abstract="true" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="greetingadvisor"
+		  p:proxyTargetClass="true"></bean>
+		<bean id="waiter" parent="parent" p:target-ref="waitertarget"></bean>
+		<bean id="seller" parent="parent" p:target-ref="sellertarget"></bean>
+		<!-- 正则表达式切面 -->
+		<bean id="regexAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"
+		  p:advice-ref="greetingbefore">
+		  <property name="patterns">
+		    <list><value>.*greet.*</value></list>
+		  </property>
+		</bean>
+		<bean id="waiter1" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="regexAdvisor"
+		  p:target-ref="waitertarget"
+		  p:proxyTargetClass="true"></bean>
+		<!-- 动态切面 -->
+		<bean id="dynamicAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		  <property name="pointcut">
+		    <bean class="com.xwj.aop.GreetingDynamicPointcut"></bean>
+		  </property>
+		  <property name="advice" ref="greetingbefore"></property>
+		</bean>
+		<bean id="waiter2" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="dynamicAdvisor"
+		  p:target-ref="waitertarget"
+		  p:proxyTargetClass="true"></bean>
+		<!-- 流程切面 -->
+		<bean id="controlPointcut" class="org.springframework.aop.support.ControlFlowPointcut">
+		  <constructor-arg type="java.lang.Class" value="com.xwj.aop.Waiter1Delegate"></constructor-arg>
+		  <constructor-arg type="java.lang.String" value="service"></constructor-arg>
+		</bean>
+		<bean id="controlAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		  <property name="pointcut" ref="controlPointcut">
+		  </property>
+		  <property name="advice" ref="greetingbefore"></property>
+		</bean>
+		<bean id="waiter3" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="controlAdvisor"
+		  p:target-ref="waitertarget"
+		  p:proxyTargetClass="true"></bean>
+		<bean id="gcp" class="com.xwj.aop.GreetingComposablePointcut"></bean>
+		<bean id="composableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
+		  p:pointcut="#{gcp.intersectionPointcut}"
+		  p:advice-ref="greetingbefore">
+		</bean>
+		<bean id="waiter4" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="composableAdvisor"
+		  p:target-ref="waitertarget"
+		  p:proxyTargetClass="true"></bean>
+		<!-- 引介切面 -->
+		<bean id="introduceAdvisor" class="org.springframework.aop.support.DefaultIntroductionAdvisor">
+		  <constructor-arg>
+		    <bean class="com.xwj.aop.ControllerMonitor"></bean>
+		  </constructor-arg>
+		</bean>
+		<bean id="forumservice" class="org.springframework.aop.framework.ProxyFactoryBean"
+		  p:interceptorNames="introduceAdvisor"
+		  p:target-ref="forumtarget"
+		  p:proxyTargetClass="true"></bean>
+		<!-- 根据名字自动代理 -->
+		<bean id="waiter22" class="com.xwj.aop.Waiter2"></bean>
+		<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"
+		  p:beanNames="waiter22"
+		  p:interceptorNames="greetingbefore"
+		  p:optimize="true"></bean>
+		<!-- 根据切面自动代理 <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>-->
+		
+</beans>
